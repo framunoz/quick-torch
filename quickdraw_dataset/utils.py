@@ -7,7 +7,7 @@ _CACHE_PATH = Path(".", ".quickdraw_cache")
 _CACHE_PATH.mkdir(parents=True, exist_ok=True)
 _CAT_PATH = _CACHE_PATH / "categories.txt"
 
-# Download categories.text if does not exists
+# Download categories.txt if it does not exist
 if not _CAT_PATH.exists():
     url = "https://raw.githubusercontent.com/googlecreativelab/quickdraw-dataset/master/categories.txt"
     res = requests.get(url)
@@ -15,7 +15,7 @@ if not _CAT_PATH.exists():
         f.write(res.text)
     res.close()
 
-# Create auxiliary lists
+# Create auxiliary lists for the enumerator
 with _CAT_PATH.open("r") as f:
     _CATEGORIES = [
         (cat[:-1].upper().replace(" ", "_").replace("-", "_"), cat[:-1]) for cat in f
