@@ -3,10 +3,10 @@ import pathlib
 from pkg_resources import parse_requirements
 from setuptools import find_packages, setup
 
-LIBRARY_NAME = "quickraw_dataset"  # Rename according to te "library" folder
+LIBRARY_NAME = "quickdraw_dataset"  # Rename according to te "library" folder
 
 # List of requirements
-with pathlib.Path('requirements.txt').open() as requirements_txt:
+with pathlib.Path("requirements.txt").open() as requirements_txt:
     install_requires = [
         str(requirement) for requirement in parse_requirements(requirements_txt)
     ]
