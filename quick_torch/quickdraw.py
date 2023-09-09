@@ -1,6 +1,6 @@
 import io
 from pathlib import Path
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Iterable, Optional, Sequence, Tuple
 
 import ndjson
 import numpy as np
@@ -10,8 +10,8 @@ from torchvision.datasets.vision import VisionDataset
 
 from .utils import Category
 
-_SIMPL_URL = "https://storage.googleapis.com/quickdraw_dataset/full/simplified/"
-_NUMPY_URL = "https://storage.googleapis.com/quickdraw_dataset/full/numpy_bitmap/"
+_CATEGORY_T = Category | str
+_LABEL = {cat: i for i, cat in enumerate(Category)}
 
 
 class QuickDraw(VisionDataset):
@@ -28,17 +28,29 @@ class QuickDraw(VisionDataset):
         transform (callable, optional): A function/transform that  takes in an PIL image
             and returns a transformed version. E.g, ``transforms.RandomCrop``
     """
+    ndjson_url = "https://storage.googleapis.com/quickdraw_dataset/full/simplified/"
+    numpy_url = "https://storage.googleapis.com/quickdraw_dataset/full/numpy_bitmap/"
 
     def __init__(
         self,
         root: str,
-        category: Category | str = "face",
+        category: _CATEGORY_T | Sequence[_CATEGORY_T] = "face",
         recognized: bool = None,
         download: bool = False,
         transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None
     ) -> None:
-        super().__init__(root=root, transform=transform)
+        super().__init__(root=root, transform=transform, target_transform=target_transform)
 
+        # self.category: list[Category]
+        # match category:
+        #     case None:
+        #         self.category = [cat for cat in Category]
+        #     case Category(category) as cat:
+        #         self.category = [cat]
+        #     case _:
+        #         self.category = [Category(cat) for cat in category]
+            
         self.category: Category = Category(category)
         self.recognized: bool = recognized
 
@@ -73,7 +85,7 @@ class QuickDraw(VisionDataset):
         # Create path of directories
         self.folder.mkdir(parents=True, exist_ok=True)
         # Download npy file
-        url = _NUMPY_URL + self.category.query + ".npy"
+        url = self.numpy_url + self.category.query + ".npy"
         try:
             print(f"Downloading {url}")
             response = requests.get(url)
@@ -86,7 +98,7 @@ class QuickDraw(VisionDataset):
             print()
 
         # Download ndjson file
-        url = _SIMPL_URL + self.category.query + ".ndjson"
+        url = self.ndjson_url + self.category.query + ".ndjson"
         try:
             print(f"Downloading {url}")
             response = requests.get(url)
@@ -124,11 +136,15 @@ class QuickDraw(VisionDataset):
             tuple: (image, target) where target is index of the target class.
         """
         img = Image.fromarray(self.data[index], mode="L")
+        target = _LABEL[self.category]
 
         if self.transform:
             img = self.transform(img)
 
-        return img, self.category.label
+        if self.target_transform:
+            target = self.target_transform(target)
+
+        return img, target
 
     def __len__(self):
         return len(self.data)

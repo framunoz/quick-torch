@@ -3,7 +3,7 @@ import pathlib
 from pkg_resources import parse_requirements
 from setuptools import find_packages, setup
 
-LIBRARY_NAME = "quickdraw_dataset"  # Rename according to te "library" folder
+LIBRARY_NAME = "quick_torch"  # Rename according to te "library" folder
 
 # List of requirements
 with pathlib.Path("requirements.txt").open() as requirements_txt:
@@ -14,7 +14,7 @@ with pathlib.Path("requirements.txt").open() as requirements_txt:
 setup(
     name=LIBRARY_NAME,
     packages=find_packages(include=[LIBRARY_NAME]),
-    version="0.1.0",
+    version="0.1.1",
     description="Description",
     author="Author",
     license="MIT",
