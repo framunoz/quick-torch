@@ -25,9 +25,6 @@ setup(
     author="Francisco Muñoz G.",
     license="MIT",
     install_requires=install_requires,
-    setup_requires=[
-        'setuptools',
-    ],
     python_requires='>=3.10',
     setup_requires=["pytest-runner"],
     tests_requires=["pytest==4.4.1"],
