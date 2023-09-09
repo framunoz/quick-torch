@@ -12,8 +12,8 @@ with pathlib.Path("requirements.txt").open() as requirements_txt:
     ]
 
 # Long description
-with pathlib.Path("README.md") as f:
-    long_description = f.read()
+# with pathlib.Path("README.md") as f:
+#     long_description = f.read()
 
 setup(
     name=LIBRARY_NAME,
