@@ -21,11 +21,11 @@ setup(
     version="1.0.0",
     description=('Quick, Torch! is a simple package that provides a "Quick, Draw!" using'
                  ' the abstract class `VisionDataset`, provided by `torchvision` API.'),
-    long_description=long_description,
+    # long_description=long_description,
     author="Francisco Muñoz G.",
     license="MIT",
     install_requires=install_requires,
-    python_requires='>=3.10',
+    # python_requires='>=3.10',
     setup_requires=["pytest-runner"],
     tests_requires=["pytest==4.4.1"],
     test_suite="tests",
