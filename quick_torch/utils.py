@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class Category(Enum):
+    """Enumerates the categories in the dataset 'Quick, Draw!'"""
     AIRCRAFT_CARRIER = "aircraft carrier"
     AIRPLANE = "airplane"
     ALARM_CLOCK = "alarm clock"
