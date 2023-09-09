@@ -19,10 +19,9 @@ setup(
     name=LIBRARY_NAME,
     packages=find_packages(include=[LIBRARY_NAME]),
     version="1.0.0",
-    description=('Quick, Torch! is a simple package that provides a "Quick, Draw!" using'
-                 ' the abstract class `VisionDataset`, provided by `torchvision` API.'),
+    description=('Library that provides a QuickDraw dataset using the Pytorch API.'),
     # long_description=long_description,
-    author="Francisco Muñoz G.",
+    author="Francisco Munoz G.",
     license="MIT",
     install_requires=install_requires,
     # python_requires='>=3.10',

@@ -1,4 +1,5 @@
 setuptools
 requests
+torch
 torchvision
 ndjson
