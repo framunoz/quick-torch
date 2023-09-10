@@ -27,7 +27,7 @@ setup(
     url='https://github.com/framunoz/quick-torch',
     # long_description=long_description,
     # long_description_content_type='text/markdown',
-    author="Francisco Muñoz G.",
+    author="Francisco Munoz G.",
     license="MIT",
     license_files=["LICENSE"],
     install_requires=install_requires,
