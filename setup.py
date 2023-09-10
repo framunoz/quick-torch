@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pkg_resources import parse_requirements
 from setuptools import find_packages, setup
 
 import quick_torch
@@ -7,9 +8,13 @@ import quick_torch
 LIBRARY_NAME = "quick_torch"  # Rename according to te "library" folder
 
 # List of requirements
-install_requires = [
-    requirement.strip() for requirement in open("requirements.txt").readlines()
-]
+# install_requires = [
+#     requirement.strip() for requirement in open("requirements.txt").readlines()
+# ]
+with Path('requirements.txt').open() as requirements_txt:
+    install_requires = [
+        str(requirement) for requirement in parse_requirements(requirements_txt)
+    ]
 
 # Long description
 # long_description = Path("README.md").read_text()
@@ -21,7 +26,7 @@ setup(
     description=('Library that provides a QuickDraw dataset using the Pytorch API.'),
     url='https://github.com/framunoz/quick-torch',
     # long_description=long_description,
-    long_description_content_type='text/markdown',
+    # long_description_content_type='text/markdown',
     author="Francisco Muñoz G.",
     license="MIT",
     license_files=["LICENSE"],
