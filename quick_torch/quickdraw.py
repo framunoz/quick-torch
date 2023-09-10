@@ -3,7 +3,7 @@ import math
 from pathlib import Path
 from typing import Any, Callable, Iterable, Optional, Sequence, Tuple
 
-import ndjson
+import jsonlines
 import numpy as np
 import requests
 import torch
@@ -143,7 +143,7 @@ class QuickDraw(VisionDataset):
             try:
                 print(f"Downloading {url_ndjson}")
                 response = requests.get(url_ndjson)
-                items = response.json(cls=ndjson.Decoder)
+                items = jsonlines.Reader(io.BytesIO(response.content))
                 recognized = []
                 for item in items:
                     recognized.append(item["recognized"])

@@ -2,4 +2,4 @@ setuptools
 requests
 torch
 torchvision
-ndjson
+jsonlines
