@@ -29,7 +29,7 @@ setup(
     # long_description_content_type='text/markdown',
     author="Francisco Munoz G.",
     license="MIT",
-    license_files=["LICENSE"],
+    # license_files=["LICENSE"],
     install_requires=install_requires,
     python_requires='>=3.10',
     setup_requires=["pytest-runner"],
