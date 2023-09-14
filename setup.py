@@ -22,7 +22,7 @@ long_description = Path("README.md").read_text()
 setup(
     name=LIBRARY_NAME,
     packages=find_packages(include=[LIBRARY_NAME]),
-    version="1.0.0",
+    version="1.0.1",
     description=('Library that provides a QuickDraw dataset using the Pytorch API.'),
     url='https://github.com/framunoz/quick-torch',
     long_description=long_description,

@@ -1,9 +1,10 @@
 # Quick, Torch!
 
-Quick, Torch! is a simple package that provides a "Quick, Draw!" using the abstract class `VisionDataset`, provided by `torchvision` API. It can be installed locally via the following command:
+Quick, Torch! is a simple package that provides a ["Quick, Draw!"](https://github.com/googlecreativelab/quickdraw-dataset) dataset using the abstract class `VisionDataset`, provided by `torchvision` API. This package mirrors the [MNIST](https://pytorch.org/vision/stable/generated/torchvision.datasets.MNIST.html) dataset provided in torchvision.
 
+You can install this package with
 ```
-pip install git+https://github.com/framunoz/quick-torch.git#egg=quick_torch
+pip install quick-torch --upgrade
 ```
 
 # Example
@@ -31,4 +32,4 @@ first_data
 >>> (<PIL.Image.Image image mode=L size=128x128>, 108)
 ```
 
-For more examples, please refer to the notebook [example.ipynb](./example.ipynb)
+For more examples, please refer to the notebook [example.ipynb](https://github.com/framunoz/quick-torch/blob/main/example.ipynb)
