@@ -26,10 +26,13 @@ first_data
 
 >>> Downloading https://storage.googleapis.com/quickdraw_dataset/full/numpy_bitmap/face.npy
 >>> 
->>> Downloading https://storage.googleapis.com/quickdraw_dataset/full/simplified/face.ndjson
->>> 
 >>> len(ds) = 161666
 >>> (<PIL.Image.Image image mode=L size=128x128>, 108)
 ```
 
 For more examples, please refer to the notebook [example.ipynb](https://github.com/framunoz/quick-torch/blob/main/example.ipynb)
+
+# References
+This work was mainly inspired by the following repositories:
+- [MNIST from torchvision](https://github.com/pytorch/vision/blob/main/torchvision/datasets/mnist.py#L19)
+- [The dataset of this notebook](https://github.com/nateraw/quickdraw-pytorch/blob/main/quickdraw.ipynb)
