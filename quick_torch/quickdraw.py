@@ -12,11 +12,15 @@ from torchvision.datasets.vision import VisionDataset
 
 from .utils import Category
 
+__all__ = ["QuickDraw"]
+
 _CATEGORY_T = Category | str
 _LABEL = {category: i for i, category in enumerate(Category)}
 
 
-def _create_list_categories(categories: _CATEGORY_T | Iterable[_CATEGORY_T]) -> list[Category]:
+def _create_list_categories(
+    categories: _CATEGORY_T | Iterable[_CATEGORY_T],
+) -> list[Category]:
     if categories is None:
         to_return = list(Category)
     elif isinstance(categories, (str, Category)):
@@ -26,7 +30,6 @@ def _create_list_categories(categories: _CATEGORY_T | Iterable[_CATEGORY_T]) -> 
     else:
         raise TypeError("Please provide a category or an iterable of categories.")
     return to_return
-
 
 
 class QuickDraw(VisionDataset):
@@ -48,9 +51,10 @@ class QuickDraw(VisionDataset):
             target and transforms it.
         recognized (bool, optional): If true, uses the recognized data. If None, use all data.
         max_items_per_class (int, optional): The maximum number of images per category. If None, use all data.
-        seed (int, optional): Sets the seed for the division. Used for the train_percentage parameter. 
+        seed (int, optional): Sets the seed for the division. Used for the train_percentage parameter.
             Default is 12722028422223837445.
     """
+
     ndjson_url = "https://storage.googleapis.com/quickdraw_dataset/full/simplified/"
     numpy_url = "https://storage.googleapis.com/quickdraw_dataset/full/numpy_bitmap/"
 
@@ -67,7 +71,9 @@ class QuickDraw(VisionDataset):
         max_items_per_class: Optional[int] = None,
         seed: Optional[int] = 12722028422223837445,
     ) -> None:
-        super().__init__(root=root, transform=transform, target_transform=target_transform)
+        super().__init__(
+            root=root, transform=transform, target_transform=target_transform
+        )
 
         self.categories: list[Category] = _create_list_categories(categories)
         self.train = train
@@ -89,20 +95,22 @@ class QuickDraw(VisionDataset):
     @property
     def folders(self) -> list[Path]:
         """List of all category folders."""
-        return [Path(self.root, self.__class__.__name__, cat.value) for cat in self.categories]
+        return [
+            Path(self.root, self.__class__.__name__, cat.value)
+            for cat in self.categories
+        ]
 
     def _check_exists(self) -> bool:
         """Check that all the respective folders exist."""
         return all([folder.exists() for folder in self.folders])
-    
+
     def _check_files_exists(self, folder: Path) -> bool:
         """Check that all the necessary files exist in that folder."""
-        files_name = [
-            f"data{recog}.npy" for recog in ["", "_recognized", "_not_recognized"]
-        ]
+        files_name = ["data.npy"]
+        if self.recognized is not None:
+            files_name += ["data_recognized.npy", "data_not_recognized.npy"]
         files = [(folder / name).exists() for name in files_name]
         return all(files)
-
 
     def _check_all_files_exist(self) -> bool:
         """Check that all files exist in their respective folders."""
@@ -119,43 +127,53 @@ class QuickDraw(VisionDataset):
             folder.mkdir(parents=True, exist_ok=True)
 
         # Create list of urls
-        urls_npy = [self.numpy_url + category.query + ".npy" for category in self.categories]
-        urls_ndjson = [self.ndjson_url + category.query + ".ndjson" for category in self.categories]
+        urls_npy = [
+            self.numpy_url + category.query + ".npy" for category in self.categories
+        ]
+        urls_ndjson = [
+            self.ndjson_url + category.query + ".ndjson" for category in self.categories
+        ]
 
         for url_npy, url_ndjson, folder in zip(urls_npy, urls_ndjson, self.folders):
-            # If the files exist, continue with the next category
-            if self._check_files_exists(folder):
-                continue
+            data = None
 
             # Download npy file
-            try:
-                print(f"Downloading {url_npy}")
-                response = requests.get(url_npy)
-                response.raise_for_status()
-                data = np.load(io.BytesIO(response.content))
-                np.save(folder / "data.npy", data)
-            except Exception as error:
-                print(f"Failed to download (trying next):\n{error}")
-            finally:
-                print()
+            if not (folder / "data.npy").exists():
+                try:
+                    print(f"Downloading {url_npy}")
+                    response = requests.get(url_npy)
+                    response.raise_for_status()
+                    data = np.load(io.BytesIO(response.content))
+                    np.save(folder / "data.npy", data)
+                except Exception as error:
+                    print(f"Failed to download (trying next):\n{error}")
+                finally:
+                    print()
 
             # Download ndjson file
-            try:
-                print(f"Downloading {url_ndjson}")
-                response = requests.get(url_ndjson)
-                items = jsonlines.Reader(io.BytesIO(response.content))
-                recognized = []
-                for item in items:
-                    recognized.append(item["recognized"])
-                recognized = np.array(recognized)
-                data_recognized = data[recognized]
-                data_not_recognized = data[~recognized]
-                np.save(folder / "data_recognized.npy", data_recognized)
-                np.save(folder / "data_not_recognized.npy", data_not_recognized)
-            except Exception as error:
-                print(f"Failed to download (trying next):\n{error}")
-            finally:
-                print()
+            if (
+                self.recognized is not None
+                and not (folder / "data_recognized.npy").exists()
+                and not (folder / "data_not_recognized.npy").exists()
+            ):
+                try:
+                    print(f"Downloading {url_ndjson}")
+                    response = requests.get(url_ndjson)
+                    items = jsonlines.Reader(io.BytesIO(response.content))
+                    recognized = []
+                    for item in items:
+                        recognized.append(item["recognized"])
+                    recognized = np.array(recognized)
+                    if data is None:
+                        data = np.load(folder / "data.npy")
+                    data_recognized = data[recognized]
+                    data_not_recognized = data[~recognized]
+                    np.save(folder / "data_recognized.npy", data_recognized)
+                    np.save(folder / "data_not_recognized.npy", data_not_recognized)
+                except Exception as error:
+                    print(f"Failed to download (trying next):\n{error}")
+                finally:
+                    print()
 
     def _load_data(self):
         X = np.empty([0, 784], dtype=np.uint8)
@@ -184,7 +202,7 @@ class QuickDraw(VisionDataset):
                     data = data[indices[n_val:]]
 
             if self.max_items_per_class:
-                data = data[:self.max_items_per_class, :]
+                data = data[: self.max_items_per_class, :]
 
             labels = np.full(data.shape[0], _LABEL[category])
 
