@@ -3,7 +3,6 @@ import math
 from pathlib import Path
 from typing import Any, Callable, Iterable, Optional, Sequence, Tuple
 
-import jsonlines
 import numpy as np
 import requests
 import torch
@@ -145,8 +144,10 @@ class QuickDraw(VisionDataset):
                     response.raise_for_status()
                     data = np.load(io.BytesIO(response.content))
                     np.save(folder / "data.npy", data)
+
                 except Exception as error:
                     print(f"Failed to download (trying next):\n{error}")
+
                 finally:
                     print()
 
@@ -157,21 +158,29 @@ class QuickDraw(VisionDataset):
                 and not (folder / "data_not_recognized.npy").exists()
             ):
                 try:
+                    import jsonlines
+
                     print(f"Downloading {url_ndjson}")
                     response = requests.get(url_ndjson)
                     items = jsonlines.Reader(io.BytesIO(response.content))
+
                     recognized = []
                     for item in items:
                         recognized.append(item["recognized"])
                     recognized = np.array(recognized)
+
                     if data is None:
                         data = np.load(folder / "data.npy")
+
                     data_recognized = data[recognized]
                     data_not_recognized = data[~recognized]
+
                     np.save(folder / "data_recognized.npy", data_recognized)
                     np.save(folder / "data_not_recognized.npy", data_not_recognized)
+
                 except Exception as error:
                     print(f"Failed to download (trying next):\n{error}")
+
                 finally:
                     print()
 
