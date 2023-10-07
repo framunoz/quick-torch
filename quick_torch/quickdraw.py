@@ -165,10 +165,10 @@ class QuickDraw(VisionDataset):
 
     def get_test_data(self, train_percentage=None, seed=None):
         """Return a copy of the dataset with the test data."""
-        if self.train is None:
+        if self.train is False:
             return self.copy()
 
-        if self.train:
+        if self.train is True:
             raise ValueError(
                 "The train parameter is set to True. You can't get the test data."
             )
@@ -186,10 +186,10 @@ class QuickDraw(VisionDataset):
 
     def get_train_data(self, train_percentage=None, seed=None):
         """Return a copy of the dataset with the train data."""
-        if self.train is None:
+        if self.train is True:
             return self.copy()
 
-        if not self.train:
+        if self.train is False:
             raise ValueError(
                 "The train parameter is set to False. You can't get the train data."
             )
