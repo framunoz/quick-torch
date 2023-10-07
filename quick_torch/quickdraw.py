@@ -1,12 +1,13 @@
 import io
 import math
+import typing as t
 from pathlib import Path
-from typing import Any, Callable, Iterable, Optional, Sequence, Tuple
 
 import numpy as np
 import requests
 import torch
 from PIL import Image
+from torch.utils.data.dataset import ConcatDataset, Dataset
 from torchvision.datasets.vision import VisionDataset
 
 from .utils import Category
@@ -18,13 +19,13 @@ _LABEL = {category: i for i, category in enumerate(Category)}
 
 
 def _create_list_categories(
-    categories: _CATEGORY_T | Iterable[_CATEGORY_T],
+    categories: _CATEGORY_T | t.Iterable[_CATEGORY_T],
 ) -> list[Category]:
     if categories is None:
         to_return = list(Category)
     elif isinstance(categories, (str, Category)):
         to_return = [Category(categories)]
-    elif isinstance(categories, Iterable):
+    elif isinstance(categories, t.Iterable):
         to_return = [Category(category) for category in categories]
     else:
         raise TypeError("Please provide a category or an iterable of categories.")
@@ -60,15 +61,15 @@ class QuickDraw(VisionDataset):
     def __init__(
         self,
         root: str,
-        categories: Optional[_CATEGORY_T | Sequence[_CATEGORY_T]] = "face",
-        train: Optional[bool] = None,
+        categories: t.Optional[_CATEGORY_T | t.Sequence[_CATEGORY_T]] = "face",
+        train: t.Optional[bool] = None,
         train_percentage: float = 0.9,
-        transform: Optional[Callable] = None,
-        target_transform: Optional[Callable] = None,
+        transform: t.Optional[t.Callable] = None,
+        target_transform: t.Optional[t.Callable] = None,
         download: bool = False,
-        recognized: Optional[bool] = None,
-        max_items_per_class: Optional[int] = None,
-        seed: Optional[int] = 12722028422223837445,
+        recognized: t.Optional[bool] = None,
+        max_items_per_class: t.Optional[int] = None,
+        seed: t.Optional[int] = 12722028422223837445,
     ) -> None:
         super().__init__(
             root=root, transform=transform, target_transform=target_transform
@@ -90,6 +91,119 @@ class QuickDraw(VisionDataset):
             )
 
         self.data, self.targets = self._load_data()
+
+    def __getitem__(self, index: int) -> t.Tuple[t.Any, t.Any]:
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (image, target) where target is index of the target class.
+        """
+        img = Image.fromarray(self.data[index], mode="L")
+        target = self.targets[index]
+
+        if self.transform:
+            img = self.transform(img)
+
+        if self.target_transform:
+            target = self.target_transform(target)
+
+        return img, target
+
+    def __len__(self):
+        return len(self.data)
+
+    def copy(self):
+        """Return a copy of the dataset."""
+        return QuickDraw(
+            root=self.root,
+            categories=self.categories,
+            train=self.train,
+            train_percentage=self.train_percentage,
+            transform=self.transform,
+            target_transform=self.target_transform,
+            download=False,
+            recognized=self.recognized,
+            max_items_per_class=self.max_items_per_class,
+            seed=self.seed,
+        )
+
+    def __add__(self, other: Dataset) -> t.Union[ConcatDataset, Dataset]:
+        if not isinstance(other, self.__class__):
+            return super().__add__(other)
+
+        categories = list(set(self.categories + other.categories))
+        data = np.concatenate((self.data, other.data), axis=0)
+        targets = np.concatenate((self.targets, other.targets), axis=0)
+        to_return = QuickDraw(
+            root=self.root,
+            categories=categories,
+            train=self.train,
+            train_percentage=self.train_percentage,
+            transform=self.transform,
+            target_transform=self.target_transform,
+            download=False,
+            recognized=self.recognized,
+            max_items_per_class=self.max_items_per_class,
+            seed=self.seed,
+        )
+        to_return.data = data
+        to_return.targets = targets
+
+        return to_return
+
+    def _get_indice_n_val(self, train_percentage, seed):
+        train_percentage = train_percentage or self.train_percentage
+        seed = seed or self.seed
+
+        generator = torch.manual_seed(seed)
+        n_data = self.data.shape[0]
+        indices = torch.randperm(n_data, generator=generator).tolist()
+        n_val = math.floor(len(indices) * train_percentage)
+        return indices, n_val
+
+    def get_test_data(self, train_percentage=None, seed=None):
+        """Return a copy of the dataset with the test data."""
+        if self.train is None:
+            return self.copy()
+
+        if self.train:
+            raise ValueError(
+                "The train parameter is set to True. You can't get the test data."
+            )
+
+        indices, n_val = self._get_indice_n_val(train_percentage, seed)
+
+        data = self.data[indices[n_val:]]
+        targets = self.targets[indices[n_val:]]
+
+        self_copy = self.copy()
+        self_copy.data = data
+        self_copy.targets = targets
+
+        return self_copy
+
+    def get_train_data(self, train_percentage=None, seed=None):
+        """Return a copy of the dataset with the train data."""
+        if self.train is None:
+            return self.copy()
+
+        if not self.train:
+            raise ValueError(
+                "The train parameter is set to False. You can't get the train data."
+            )
+
+        indices, n_val = self._get_indice_n_val(train_percentage, seed)
+
+        data = self.data[indices[:n_val]]
+        targets = self.targets[indices[:n_val]]
+
+        self_copy = self.copy()
+        self_copy.data = data
+        self_copy.targets = targets
+
+        return self_copy
 
     @property
     def folders(self) -> list[Path]:
@@ -221,25 +335,3 @@ class QuickDraw(VisionDataset):
         X = X.reshape(-1, 28, 28)
 
         return X, y
-
-    def __getitem__(self, index: int) -> Tuple[Any, Any]:
-        """
-        Args:
-            index (int): Index
-
-        Returns:
-            tuple: (image, target) where target is index of the target class.
-        """
-        img = Image.fromarray(self.data[index], mode="L")
-        target = self.targets[index]
-
-        if self.transform:
-            img = self.transform(img)
-
-        if self.target_transform:
-            target = self.target_transform(target)
-
-        return img, target
-
-    def __len__(self):
-        return len(self.data)
