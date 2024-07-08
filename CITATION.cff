@@ -7,4 +7,6 @@ authors:
 title: "quick-torch"
 version: 1.0.4
 date-released: 2023-10-07
-url: "https://github.com/framunoz/quick-torch"
+repository-code: "https://github.com/framunoz/quick-torch"
+url: "https://pypi.org/project/quick-torch/"
+license: MIT
