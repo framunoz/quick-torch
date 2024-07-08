@@ -32,6 +32,21 @@ first_data
 
 For more examples, please refer to the notebook [example.ipynb](https://github.com/framunoz/quick-torch/blob/main/example.ipynb)
 
+# How to cite?
+
+If you use this code in your work, please reference it as follows:
+```
+@software{munoz2023quicktorch,
+  author  = {Mu\~{n}oz, Francisco},
+  license = {MIT},
+  month   = oct,
+  title   = {{quick-torch}},
+  url     = {https://github.com/framunoz/quick-torch},
+  version = {1.0.4},
+  year    = {2023}
+}
+```
+
 # References
 This work was mainly inspired by the following repositories:
 - [MNIST from torchvision](https://github.com/pytorch/vision/blob/main/torchvision/datasets/mnist.py#L19)
