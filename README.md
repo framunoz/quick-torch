@@ -39,7 +39,7 @@ If you use this code in your work, please reference it as follows:
 @software{munoz2023quicktorch,
   author  = {Mu\~{n}oz, Francisco},
   license = {MIT},
-  month   = oct,
+  month   = {10},
   title   = {{quick-torch}},
   url     = {https://github.com/framunoz/quick-torch},
   version = {1.0.4},
